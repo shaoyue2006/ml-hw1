@@ -1,0 +1,69 @@
+{
+  "utc": "2026-11-07T14:16:44.608229+00:00",
+  "config": {
+    "seed": 42,
+    "hidden": [
+      64,
+      32
+    ],
+    "learning_rate": 0.001,
+    "batch_size": 128,
+    "max_epochs": 100,
+    "patience": 10,
+    "inner_tail_day_fraction": 0.15,
+    "device": "cpu",
+    "threads": 1,
+    "n_splits": 5,
+    "demand_quantiles": [
+      0.25,
+      0.75
+    ]
+  },
+  "features": [
+    "temp",
+    "atemp",
+    "hum",
+    "windspeed",
+    "season",
+    "yr",
+    "mnth",
+    "hr",
+    "holiday",
+    "weekday",
+    "workingday",
+    "weathersit"
+  ],
+  "target": "cnt",
+  "data_sha256": "e03de4ee4ef4dc376ac6e04bf829673c6269e8eba5c60fa121640fa2f829504f",
+  "design": "Dense train-only imputation, numeric standardization and one-hot; train-only target z-score. ReLU hidden layers; linear output; MSELoss; Adam defaults. No postprocessing.",
+  "stopping": "Last ceil(15% of unique training days), strictly lower standardized MSE, first minimum, patience 10. Restart seed 42, fit transforms and network on full window for selected epochs.",
+  "evaluation": "Follow-up after v2 test publication; fixed MLP, no model selection across versions.",
+  "environment": {
+    "torch": "2.11.0+cu128",
+    "scikit-learn": "1.7.1",
+    "numpy": "2.2.5",
+    "scipy": "1.15.3",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.8",
+    "joblib": "1.5.3",
+    "tomli": "2.4.0",
+    "threadpoolctl": "3.5.0"
+  },
+  "python": "3.10.20 | packaged by Anaconda, Inc. | (main, Mar 11 2026, 17:42:35) [MSC v.1942 64 bit (AMD64)]",
+  "executable": "D:\\Anaconda3\\envs\\macr_cif\\python.exe",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "device": "cpu",
+  "cuda_available": true,
+  "cuda_build": "12.8",
+  "cuda_gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "source_sha256": {
+    "network.py": "607aaf1ba5b7cfb109cae644865318c1422895c65168a8334984a89a3be6db61",
+    "experiment.py": "1fa68969204ffbcd89ea2fdf4c22b615d360909ea10a6da0360aec44eab5fe0a",
+    "contract.py": "5454dcf43b7043b7e7fc1200ab08e4b0d754e69ec891e3e1d1cb9156eab609ad",
+    "data.py": "e0a4d9bb3ee99384a1db37f253b43c201523eb52e04a6273957116b40fd64e66",
+    "preprocessing.py": "c22da04b5690a258e6420290db4c8fb706f88211cc8f04c8f21091c1ba1d8c35",
+    "validation.py": "4b62c95ba5f0d7aa7fceab9d884f8b09fba02bce24460da6f1ce9e24da720351",
+    "metrics.py": "e28b0f55259dce0598d7b09f90a7b5a1b1a1b756377a2fcda1d1f67ee3d937df",
+    "paths.py": "55a1dca2d0eb4a1d2c38ccab95f33975f93bcb9659fc93638bddc17c3272b422"
+  }
+}

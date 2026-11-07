@@ -1,0 +1,73 @@
+{
+  "completed_utc": "2026-11-07T15:14:51.895107+00:00",
+  "purpose": "Supplementary held-out evaluation of frozen v1 baselines; no model selection",
+  "train_rows": 13915,
+  "test_rows_per_model": 3464,
+  "train_dates": [
+    "2011-01-01",
+    "2012-08-07"
+  ],
+  "test_dates": [
+    "2012-08-08",
+    "2012-12-31"
+  ],
+  "models": {
+    "poisson": {
+      "alpha": 0.1,
+      "fit_intercept": true,
+      "max_iter": 2000,
+      "solver": "lbfgs",
+      "tol": 1e-06,
+      "verbose": 0,
+      "warm_start": false
+    },
+    "decision_tree": {
+      "ccp_alpha": 0.0,
+      "criterion": "squared_error",
+      "max_depth": 12,
+      "max_features": null,
+      "max_leaf_nodes": null,
+      "min_impurity_decrease": 0.0,
+      "min_samples_leaf": 10,
+      "min_samples_split": 2,
+      "min_weight_fraction_leaf": 0.0,
+      "monotonic_cst": null,
+      "random_state": 42,
+      "splitter": "best"
+    }
+  },
+  "features": [
+    "temp",
+    "atemp",
+    "hum",
+    "windspeed",
+    "season",
+    "yr",
+    "mnth",
+    "hr",
+    "holiday",
+    "weekday",
+    "workingday",
+    "weathersit"
+  ],
+  "target": "cnt",
+  "seed": 42,
+  "threads": 4,
+  "output": "raw; residual = y_pred - y_true",
+  "sha256": {
+    "v1/data/raw/hour.csv": "e03de4ee4ef4dc376ac6e04bf829673c6269e8eba5c60fa121640fa2f829504f",
+    "v1/configs/baseline.toml": "e582a955f7d01dcdfe7526b32188f7f8c80ac9644b52e49a6987ff08f4c99aa2",
+    "v2/c_stage/runs/pre_1109/test/predictions.csv.gz": "a34eee7ba0b57f2b73ead45d7ef354cd74d332980489124150861310a55878d0",
+    "v1/uv.lock": "a0d31b1cfe8c1cad34346a778c3b6dfe8d979790821799dc7e8dd374136fdd1b",
+    "presentation/scripts/evaluate_v1_holdout.py": "7e0e13e533b5d2b619216cd34e3a2ae6ca7293b535ed31588280c5e74da06d2b"
+  },
+  "python": "3.12.13",
+  "packages": {
+    "scikit-learn": "1.9.1",
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "pandas": "2.3.3",
+    "threadpoolctl": "3.8.0"
+  },
+  "verified": "Archived test keys and labels matched row by row. Reloaded predictions verified using v1 metrics and independent formulas."
+}

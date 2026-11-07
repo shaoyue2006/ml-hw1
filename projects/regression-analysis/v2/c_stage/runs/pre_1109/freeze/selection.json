@@ -1,0 +1,300 @@
+{
+  "frozen_utc": "2026-11-07T13:48:05.503261+00:00",
+  "selected": "boosting_tuned",
+  "rule": "minimum unrounded arithmetic mean of five validation RMSEs; prefer original on exact tie",
+  "search_choice": {
+    "learning_rate": 0.1,
+    "max_leaf_nodes": 15,
+    "max_iter": 200
+  },
+  "retained_original": false,
+  "candidate_cv": [
+    {
+      "case": "ridge_v1",
+      "mae_mean": 80.57819108552835,
+      "mae_std": 18.52097197239644,
+      "rmse_mean": 108.83817800780056,
+      "rmse_std": 21.7647803715914,
+      "r2_mean": 0.5447426742459468,
+      "r2_std": 0.101708265509058
+    },
+    {
+      "case": "ridge_hour_workingday",
+      "mae_mean": 65.83868459942173,
+      "mae_std": 16.33628038727495,
+      "rmse_mean": 88.72826866662248,
+      "rmse_std": 19.62285070299012,
+      "r2_mean": 0.6926227499504375,
+      "r2_std": 0.1105286155391378
+    },
+    {
+      "case": "boosting_v1",
+      "mae_mean": 63.758407526509565,
+      "mae_std": 16.33678911334617,
+      "rmse_mean": 88.71437267014284,
+      "rmse_std": 20.32435309545282,
+      "r2_mean": 0.685326084557121,
+      "r2_std": 0.1325528174957709
+    },
+    {
+      "case": "boosting_native",
+      "mae_mean": 52.46660431579373,
+      "mae_std": 15.510201614850956,
+      "rmse_mean": 78.06278341989011,
+      "rmse_std": 21.896271384567846,
+      "r2_mean": 0.739582201296468,
+      "r2_std": 0.1537338610797698
+    },
+    {
+      "case": "boosting_tuned",
+      "mae_mean": 50.86200237589113,
+      "mae_std": 14.20843885563998,
+      "rmse_mean": 75.10392749670487,
+      "rmse_std": 19.409957071555034,
+      "r2_mean": 0.7560639863983428,
+      "r2_std": 0.1415681175709071
+    }
+  ],
+  "base_config": {
+    "seed": 42,
+    "n_splits": 5,
+    "threads": 4,
+    "models": {
+      "ridge": {
+        "alpha": 1.0,
+        "solver": "lsqr",
+        "tol": 1e-06
+      },
+      "poisson": {
+        "alpha": 0.1,
+        "max_iter": 2000,
+        "tol": 1e-06
+      },
+      "decision_tree": {
+        "criterion": "squared_error",
+        "max_depth": 12,
+        "min_samples_leaf": 10
+      },
+      "gradient_boosting": {
+        "loss": "squared_error",
+        "learning_rate": 0.05,
+        "max_iter": 200,
+        "max_leaf_nodes": 31,
+        "max_depth": 6,
+        "min_samples_leaf": 20,
+        "l2_regularization": 1.0,
+        "early_stopping": false
+      }
+    }
+  },
+  "features": [
+    "temp",
+    "atemp",
+    "hum",
+    "windspeed",
+    "season",
+    "yr",
+    "mnth",
+    "hr",
+    "holiday",
+    "weekday",
+    "workingday",
+    "weathersit"
+  ],
+  "numeric": [
+    "temp",
+    "atemp",
+    "hum",
+    "windspeed"
+  ],
+  "categorical": [
+    "season",
+    "yr",
+    "mnth",
+    "hr",
+    "holiday",
+    "weekday",
+    "workingday",
+    "weathersit"
+  ],
+  "target": "cnt",
+  "prediction_policy": "raw; no clipping, no rounding",
+  "preprocessing": {
+    "ridge_v1": "median/standard scale numeric, mode/one-hot categorical; unknown ignored",
+    "ridge_hour_workingday": "ridge_v1 plus one-hot(hr * 2 + workingday); unknown ignored",
+    "boosting_v1": "median numeric, mode/dense one-hot categorical; unknown ignored",
+    "boosting_native": "median numeric; mode + fold-fitted ordinal categories; unknown NaN; native category mask",
+    "boosting_tuned": "same preprocessing as boosting_native"
+  },
+  "estimators": {
+    "ridge_v1": {
+      "type": "Ridge",
+      "params": {
+        "alpha": 1.0,
+        "copy_X": true,
+        "fit_intercept": true,
+        "max_iter": null,
+        "positive": false,
+        "random_state": null,
+        "solver": "lsqr",
+        "tol": 1e-06
+      }
+    },
+    "ridge_hour_workingday": {
+      "type": "Ridge",
+      "params": {
+        "alpha": 1.0,
+        "copy_X": true,
+        "fit_intercept": true,
+        "max_iter": null,
+        "positive": false,
+        "random_state": null,
+        "solver": "lsqr",
+        "tol": 1e-06
+      }
+    },
+    "boosting_v1": {
+      "type": "HistGradientBoostingRegressor",
+      "params": {
+        "categorical_features": "from_dtype",
+        "early_stopping": false,
+        "interaction_cst": null,
+        "l2_regularization": 1.0,
+        "learning_rate": 0.05,
+        "loss": "squared_error",
+        "max_bins": 255,
+        "max_depth": 6,
+        "max_features": 1.0,
+        "max_iter": 200,
+        "max_leaf_nodes": 31,
+        "min_samples_leaf": 20,
+        "monotonic_cst": null,
+        "n_iter_no_change": 10,
+        "quantile": null,
+        "random_state": 42,
+        "scoring": "loss",
+        "tol": 1e-07,
+        "validation_fraction": 0.1,
+        "verbose": 0,
+        "warm_start": false
+      }
+    },
+    "boosting_native": {
+      "type": "HistGradientBoostingRegressor",
+      "params": {
+        "categorical_features": [
+          false,
+          false,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "early_stopping": false,
+        "interaction_cst": null,
+        "l2_regularization": 1.0,
+        "learning_rate": 0.05,
+        "loss": "squared_error",
+        "max_bins": 255,
+        "max_depth": 6,
+        "max_features": 1.0,
+        "max_iter": 200,
+        "max_leaf_nodes": 31,
+        "min_samples_leaf": 20,
+        "monotonic_cst": null,
+        "n_iter_no_change": 10,
+        "quantile": null,
+        "random_state": 42,
+        "scoring": "loss",
+        "tol": 1e-07,
+        "validation_fraction": 0.1,
+        "verbose": 0,
+        "warm_start": false
+      }
+    },
+    "boosting_tuned": {
+      "type": "HistGradientBoostingRegressor",
+      "params": {
+        "categorical_features": [
+          false,
+          false,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "early_stopping": false,
+        "interaction_cst": null,
+        "l2_regularization": 1.0,
+        "learning_rate": 0.1,
+        "loss": "squared_error",
+        "max_bins": 255,
+        "max_depth": 6,
+        "max_features": 1.0,
+        "max_iter": 200,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 20,
+        "monotonic_cst": null,
+        "n_iter_no_change": 10,
+        "quantile": null,
+        "random_state": 42,
+        "scoring": "loss",
+        "tol": 1e-07,
+        "validation_fraction": 0.1,
+        "verbose": 0,
+        "warm_start": false
+      }
+    }
+  },
+  "source_sha256": {
+    "v1/data/raw/hour.csv": "e03de4ee4ef4dc376ac6e04bf829673c6269e8eba5c60fa121640fa2f829504f",
+    "v1/configs/baseline.toml": "e582a955f7d01dcdfe7526b32188f7f8c80ac9644b52e49a6987ff08f4c99aa2",
+    "v1/uv.lock": "a0d31b1cfe8c1cad34346a778c3b6dfe8d979790821799dc7e8dd374136fdd1b",
+    "v1/src/bike_sharing/__init__.py": "f7e924c535232f52084ee00f6a86e9c297d4d99097898ff430044c8ee04e54e1",
+    "v1/src/bike_sharing/aggregate.py": "e76f3c7418af97324388fd6b6f72ccc751edc8268fdbe36c1ad68efc403d1ca8",
+    "v1/src/bike_sharing/data.py": "e0a4d9bb3ee99384a1db37f253b43c201523eb52e04a6273957116b40fd64e66",
+    "v1/src/bike_sharing/extended_analysis.py": "488e30800cbbc900e60d6f5a3719e6e3d883917e4b2b3f9ff376bac5ddcd355b",
+    "v1/src/bike_sharing/metrics.py": "e28b0f55259dce0598d7b09f90a7b5a1b1a1b756377a2fcda1d1f67ee3d937df",
+    "v1/src/bike_sharing/models/__init__.py": "ae84600c2ea66b429b940604faea796e344a8638dd43c0a874b68d5da879c045",
+    "v1/src/bike_sharing/models/decision_tree.py": "a356cf2d91251f8d5c0d34613110064014c71cc0704f5a8042e6f5d7ef994f42",
+    "v1/src/bike_sharing/models/gradient_boosting.py": "e1f56c74671304b652c4ca038df512ede27c3e0b257919d337bdf3ad976561b0",
+    "v1/src/bike_sharing/models/poisson.py": "a6df4fda90c3171f8d0a8afe8b110834418ad9b623065ce8adb4f471591a9435",
+    "v1/src/bike_sharing/models/ridge.py": "17dfa988f2120685ff2bf690a2531ebd285970a58a8e1e41b906978fd8f9735b",
+    "v1/src/bike_sharing/paths.py": "55a1dca2d0eb4a1d2c38ccab95f33975f93bcb9659fc93638bddc17c3272b422",
+    "v1/src/bike_sharing/plotting.py": "99e5c2c1050972bfed02a815f671851dba8a29acf4339bafa4e43b414bd99df3",
+    "v1/src/bike_sharing/prepare_data.py": "e3e418de913f415ba4fdbe3e6d5cf5e98d63fff3d2f43f81f50af55fc39cd379",
+    "v1/src/bike_sharing/preprocessing.py": "c22da04b5690a258e6420290db4c8fb706f88211cc8f04c8f21091c1ba1d8c35",
+    "v1/src/bike_sharing/results.py": "d751af1ca524d2ed6a468bb1928df4449aa372bd7857aaf9add34bd9417968a2",
+    "v1/src/bike_sharing/train.py": "e0ecb4836de836a1b55dbe103ca9733ac118d6102b3f0eaf6a3c9f3d8fb56c15",
+    "v1/src/bike_sharing/validation.py": "4b62c95ba5f0d7aa7fceab9d884f8b09fba02bce24460da6f1ce9e24da720351",
+    "v2/reproduce.py": "6b65268b84db318b8a79628dcbb942ca2d6f41b124a036617cea590d73083326",
+    "v2/c_stage/experiment.py": "2f0af65eb6b55e503fe1fc9a215eb21372f941a3defb7aa46c45a951515bdb94",
+    "v2/results/run_metadata.json": "fd7261b29048ee24d4b1c4a2f6e3ea2363f3f74f94219ae7c6bc0db91e7e3cce",
+    "v2/results/summary_metrics.csv": "c8bda297b51c243ce56a5ea22a89505cf829920690929b884651b118ca9271ec",
+    "v2/results/fold_metrics.csv": "48c513668d47cc3402bc55634dd28e2407e202b805d3588924215a1a720e26b6"
+  },
+  "versions": {
+    "python": "3.12.13",
+    "numpy": "2.5.4",
+    "pandas": "2.3.3",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.9.1",
+    "threadpoolctl": "3.8.0",
+    "joblib": "1.6.0",
+    "matplotlib": "3.11.2"
+  },
+  "search_summary_sha256": "b883dbc726e3ed77f73ff2041743f248d727cafc6e3cc71139cc864fc7a04345",
+  "test_evaluated": false
+}

@@ -14,9 +14,9 @@
 | --- | --- | --- |
 | A | 数据准备与预处理 | 已完成数据集选择、质量检查、EDA、特征定义、时间划分及预处理流水线 |
 | B | 基础回归模型构建 | 已完成四种模型构建、原理说明、训练与时间验证、结果生成及基础分析 |
-| C | 模型优化与拓展实验 | 待开展参数优化、特征工程和拓展实验；已准备模型接口、基线结果及交接说明 |
+| C | 模型优化与拓展实验 | 后续参数优化和 MLP 拓展分别见 [v2](../v2/README.md) 和 [v3](../v3/README.md) |
 
-当前结果来自开发训练集内部的五折时间验证。独立测试集用于配置冻结后的最终评价。
+B 阶段成绩来自开发集内部的五折时间验证。后续 Poisson 与决策树的独立测试、逐条预测及来源见[补充独立测试](reports/baseline_report.md#补充独立测试)。
 
 ## 数据集与预测设定
 
@@ -127,6 +127,8 @@ uv run --locked bike-train --model all --config configs/experiment.toml
 ```
 
 其中 `experiment.toml` 由实验者创建，默认配置为 `configs/baseline.toml`。
+
+从本目录运行 `uv run --locked bike-train --holdout`，可按原配置复现 Poisson 与决策树的后续独立测试。两种模式均可用 `--output-root` 指定新运行的父目录。
 
 ### 整合独立结果
 

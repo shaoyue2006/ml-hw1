@@ -1,0 +1,13 @@
+# 单一预设方案。在任何 v3 训练或评分前确定。
+seed = 42
+hidden = [64, 32]
+learning_rate = 0.001
+batch_size = 128
+max_epochs = 100
+patience = 10
+inner_tail_day_fraction = 0.15
+device = "cpu"
+threads = 1
+n_splits = 5
+# 仅用于事后误差分组，从全部开发集计算分位数。
+demand_quantiles = [0.25, 0.75]

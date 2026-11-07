@@ -1,4 +1,4 @@
-"""公共训练流程：读取配置、时间验证、保存模型；不评价独立测试集。"""
+"""默认执行开发集时间验证；--holdout 复现 Poisson 和决策树的冻结配置补评。"""
 
 import argparse
 import hashlib
@@ -26,6 +26,7 @@ from bike_sharing.results import save_csv, save_results
 from bike_sharing.validation import make_time_folds
 
 DEFAULT_CONFIG = PROJECT_ROOT / "configs" / "baseline.toml"
+HOLDOUT_MODELS = ("poisson", "decision_tree")
 
 
 def load_config(path):
@@ -114,6 +115,28 @@ def run_experiment(train, config, names, output):
     return save_results(fold_metrics, predictions, output)
 
 
+def run_holdout(train, held_out, config, output):
+    """用完整开发集拟合冻结的流水线，保存独立测试的原始预测及统一指标。"""
+    if (len(train), len(held_out)) != (13915, 3464) or train.dteday.max() >= held_out.dteday.min():
+        raise ValueError("Unexpected chronological development/test split.")
+    keys = held_out[["dteday", "hr", "workingday", TARGET]].rename(columns={TARGET: "y_true"})
+    keys = keys.rename_axis("row_id").reset_index()
+    scores, predictions = [], []
+    with threadpool_limits(limits=config["threads"]), warnings.catch_warnings():
+        warnings.simplefilter("error", ConvergenceWarning)
+        for name in HOLDOUT_MODELS:
+            model = build_model(name, config["models"][name], config["seed"])
+            model.fit(train[FEATURES], train[TARGET])
+            raw = model.predict(held_out[FEATURES])
+            scores.append({"case": name, **regression_metrics(keys.y_true, raw)})
+            predictions.append(keys.assign(case=name, y_pred=raw, residual=raw - keys.y_true))
+    summary = pd.DataFrame(scores)
+    output.mkdir(parents=True, exist_ok=False)
+    save_csv(pd.concat(predictions, ignore_index=True), output / "predictions.csv.gz")
+    save_csv(summary, output / "metrics.csv")
+    return summary
+
+
 def git_revision():
     try:
         return subprocess.check_output(
@@ -141,19 +164,33 @@ def main(model_name=None):
     parser = argparse.ArgumentParser(description=__doc__)
     # 各算法文件传入固定名称；通用入口则允许 --model 选择单个或全部。
     if model_name is None:
-        parser.add_argument("--model", choices=["all", *MODEL_NAMES], default="all")
+        modes = parser.add_mutually_exclusive_group()
+        modes.add_argument("--model", choices=["all", *MODEL_NAMES], default="all")
+        modes.add_argument("--holdout", action="store_true", help="复现两种冻结基线的独立测试补评")
     else:
-        parser.set_defaults(model=model_name)
+        parser.set_defaults(model=model_name, holdout=False)
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--output-root", type=Path, default=PROJECT_ROOT / "artifacts" / "runs")
     args = parser.parse_args()
     config = load_config(args.config)
     names = list(MODEL_NAMES) if args.model == "all" else [args.model]
-    # held_out 只记录样本量，绝不传入训练/验证流程，留待 C 配置冻结后评价。
+    if args.holdout:
+        receipt = json.loads((PROJECT_ROOT / "reports/holdout_run.json").read_text("utf-8"))
+        for path, key in (
+            (args.config, "v1/configs/baseline.toml"),
+            (SOURCE, "v1/data/raw/hour.csv"),
+        ):
+            if hashlib.sha256(path.read_bytes()).hexdigest() != receipt["sha256"][key]:
+                parser.error(f"冻结补评输入与原始记录不一致: {path}")
+        names = list(HOLDOUT_MODELS)
     train, held_out = load_and_split()
-    run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ") + "_" + args.model
+    mode = "holdout" if args.holdout else args.model
+    run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ") + "_" + mode
     output = args.output_root / run_id
-    summary = run_experiment(train, config, names, output)
+    if args.holdout:
+        summary = run_holdout(train, held_out, config, output)
+    else:
+        summary = run_experiment(train, config, names, output)
     (output / "config.toml").write_bytes(args.config.read_bytes())
     # 递归记录源码哈希，算法拆入子包后也必须包含在复现信息里。
     sources = sorted((PROJECT_ROOT / "src" / "bike_sharing").rglob("*.py"))
@@ -183,11 +220,21 @@ def main(model_name=None):
         "held_out_rows": len(held_out),
         "train_start": str(train.dteday.min().date()),
         "train_end": str(train.dteday.max().date()),
-        "test_evaluated": False,
-        "selection_metric": "mean_fold_rmse",
+        "test_evaluated": args.holdout,
         "prediction_policy": "raw, no clipping or rounding",
-        "saved_models": "refitted on all development rows; not evaluated on held-out test",
     }
+    if args.holdout:
+        metadata.update(
+            purpose="Supplementary held-out evaluation of frozen v1 baselines; no model selection",
+            test_start=str(held_out.dteday.min().date()),
+            test_end=str(held_out.dteday.max().date()),
+            residual="y_pred - y_true",
+        )
+    else:
+        metadata.update(
+            selection_metric="mean_fold_rmse",
+            saved_models="refitted on all development rows; not evaluated on held-out test",
+        )
     (output / "metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     print(summary.to_string(index=False))
     print(f"Results: {output}")

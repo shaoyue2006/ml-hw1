@@ -1,0 +1,12 @@
+{
+  "inner_fit_rows": 9817,
+  "inner_tail_rows": 1770,
+  "fit_start": "2011-01-01",
+  "inner_fit_end": "2012-02-18",
+  "inner_tail_start": "2012-02-19",
+  "refit_end": "2012-05-02",
+  "refit_rows": 11587,
+  "best_epoch": 22,
+  "epochs_observed": 32,
+  "stop_reason": "patience"
+}

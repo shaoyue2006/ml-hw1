@@ -37,13 +37,14 @@ B 和 C 使用已安装的 `bike_sharing` 包。示例（在本项目的 uv 环�
 
 ```python
 from sklearn.linear_model import Ridge
-from sklearn.model_selection import TimeSeriesSplit, cross_val_score
+from sklearn.model_selection import cross_val_score
+from bike_sharing.validation import make_time_folds
 from bike_sharing.data import load_and_split, FEATURES, TARGET
 from bike_sharing.preprocessing import make_pipeline
 
 train, test = load_and_split()
 model = make_pipeline(Ridge(), scale_numeric=True)
-cv = TimeSeriesSplit(n_splits=5)
+cv = make_time_folds(train, n_splits=5)
 scores = cross_val_score(
     model, train[FEATURES], train[TARGET], cv=cv, scoring="neg_mean_absolute_error"
 )
@@ -51,6 +52,6 @@ print("交叉验证 MAE:", -scores.mean())
 # 确定模型和参数后再用全部训练集拟合，最后只在测试集评估一次。
 ```
 
-TimeSeriesSplit 基于已排序的训练行，可能在一天内部切分；如需保证每折按整天切分，可自行按日期构造折。调参参数名前加 `model__`，如 `model__alpha`。各组模型应使用同一划分和相同评价指标；不要在全量数据上提前 fit 预处理器。单独测试集不用于选特征或调参。
+`make_time_folds` 在唯一日期序列上切分，再将整天映射回小时记录。调参参数名前加 `model__`，如 `model__alpha`。各组模型应使用同一划分和相同评价指标；不要在全量数据上提前 fit 预处理器。单独测试集不用于选特征或调参。
 
 补充分析运行 `uv run --locked bike-eda`，生成工作日与小时热力图、月份与天气对比图，以及对应分组统计表。更详细的检查过程、分析结果和限制见 [数据探索与预处理报告](../reports/data_preparation.md)。

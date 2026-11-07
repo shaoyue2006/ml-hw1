@@ -1,0 +1,16 @@
+{
+  "files": {
+    "v2\\c_stage\\runs\\pre_1109\\freeze\\selection.json": "97fc8988ff6877a7c971b831083b3fde37cd97dc3a6125a6e3fe9b2ea311ed09",
+    "v2\\c_stage\\runs\\pre_1109\\freeze\\candidate_cv.csv": "a463a9af161ba0e334a98399e5e60cd1a312fb1a1a52252b708af3552a4c7e43",
+    "v2\\c_stage\\runs\\pre_1109\\test\\metrics.csv": "12670044f147e555f660f78da21105fee24743c86fa7d5225a5ad778f5fccea4",
+    "v2\\c_stage\\runs\\pre_1109\\test\\predictions.csv.gz": "a34eee7ba0b57f2b73ead45d7ef354cd74d332980489124150861310a55878d0",
+    "v2\\c_stage\\runs\\pre_1109\\search\\validation_predictions.csv.gz": "46ecfcbc0755df86ffa882c121903a04777bb6b04d1322211da2c11c06e02832"
+  },
+  "aligned_validation_rows": 11608,
+  "aligned_test_rows": 3464,
+  "band_cutoffs": [
+    37.0,
+    258.0
+  ],
+  "band_definition": "development target quartiles; low <= q25, middle <= q75, high > q75"
+}

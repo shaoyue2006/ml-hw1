@@ -10,7 +10,7 @@
 
 | 项目 | 任务与数据 | 主要方法 | 当前进度 |
 | --- | --- | --- | --- |
-| [回归算法分析](projects/regression-analysis/README.md) | 使用共享单车数据预测每小时租赁量，比较不同回归方法 | Ridge、Poisson 回归、决策树、梯度提升树 | 已完成数据准备、基础模型训练与时间验证；优化及最终测试待完成 |
+| [回归算法分析](projects/regression-analysis/README.md) | 使用共享单车数据预测每小时租赁量，比较不同回归方法 | Ridge、Poisson 回归、决策树、梯度提升树 | 基线、C 阶段优化与独立测试已完成，见[课堂摘要](projects/regression-analysis/v2/C_pre_summary.md) |
 
 ## 仓库结构
 
@@ -34,7 +34,7 @@
         │   ├── docs/
         │   ├── reports/
         │   └── tests/
-        └── v2/                 # 改进指导与诊断结论
+        └── v2/                 # 优化实验、冻结配置、最终测试和课堂材料
 ```
 
 后续项目在 `projects/` 下建立独立目录。项目名称优先描述研究任务。

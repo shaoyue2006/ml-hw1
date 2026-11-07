@@ -9,3 +9,15 @@ __pycache__/
 **/data/processed/
 **/artifacts/
 .ipynb_checkpoints/
+
+# Local reruns from the v2/v3 reproduction instructions.
+/projects/regression-analysis/v2/c_stage/runs/replay_*/
+/projects/regression-analysis/v3/replays/
+
+# Office editing locks and desktop file-manager metadata.
+~$*.pptx
+~$*.docx
+~$*.xlsx
+Thumbs.db
+desktop.ini
+.DS_Store

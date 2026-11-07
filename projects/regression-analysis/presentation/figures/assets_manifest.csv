@@ -1,0 +1,14 @@
+﻿destination,source,stage,title,metric_scope,notes
+figures/01_data/v1_hourly_pattern.png,v1/reports/figures/02_hourly_pattern.png,v1,工作日与非工作日的逐小时租赁曲线,开发集 EDA，小时组内均值,第 3 页主图；整天分组使用 workingday 标记。
+figures/01_data/v1_rental_distribution.png,v1/reports/figures/01_rental_distribution.png,v1,每小时租赁量分布,开发集 EDA，目标直方图,"第 2 页；开发集 13,915 条。"
+figures/01_data/v1_correlations.png,v1/reports/figures/04_correlations.png,v1,数值变量相关性,开发集 EDA，Pearson 相关矩阵,备查；相关性不能识别因果。
+figures/02_baselines/v1_four_model_metrics.png,v1/reports/baseline_fold_metrics.csv,v1,四种基础模型验证指标,五折时间验证，MAE/RMSE 折均值与样本标准差,第 5 页；来自 v1 四模型复现；按模型聚合五折指标，由 v1/src/bike_sharing/plotting.py 绘制。
+figures/03_optimization/v2_model_comparison.png,v2/c_stage/runs/pre_1109/analysis/model_comparison.png,v2,两组特征表示优化及模型比较,五折验证均值与独立测试，RMSE/MAE,第 6 页看蓝色验证条，分别比较 Ridge 与提升树的对应方案。
+figures/03_optimization/v2_sensitivity.png,v2/c_stage/runs/pre_1109/analysis/sensitivity.png,v2,学习率与叶节点数敏感性,开发集五折训练/验证 RMSE 均值,第 7 页；六组参数，每组固定 200 轮。
+figures/03_optimization/v2_test_week.png,v2/c_stage/runs/pre_1109/analysis/test_week.png,v2,冻结方案的测试首周预测,独立测试前七个自然日；每小时真实值与预测,第 8 页；全期测试指标另见汇总表。
+figures/04_mlp/v3_early_stopping.png,v3/results/analysis/early_stopping.png,v3,MLP 训练与内部早停曲线,标准化目标 MSE；五个外层训练窗口及完整开发集内部切分,第 9 页；右下为完整开发窗口，最佳 epoch 13。
+figures/04_mlp/v3_model_comparison.png,v3/results/analysis/model_comparison.png,v3,MLP 与经典模型的统一比较,五折验证均值与独立测试，RMSE/MAE,第 10 页看独立测试条；需求分组数据见表。
+figures/04_mlp/mlp_architecture.png,v3/results/final_model/refit.pt,v3,共享单车需求预测的 MLP 回归网络,完整开发集重训模型结构,第 9 页；以 v3/src/network.py、refit_transforms.joblib 和 v3/configs/mlp.toml 核对。 绘图脚本：presentation/scripts/make_presentation_figures.py
+figures/04_mlp/mlp_architecture.svg,v3/results/final_model/refit.pt,v3,共享单车需求预测的 MLP 回归网络,完整开发集重训模型结构,第 9 页；以 v3/src/network.py、refit_transforms.joblib 和 v3/configs/mlp.toml 核对。 绘图脚本：presentation/scripts/make_presentation_figures.py
+figures/04_mlp/demand_group_comparison.png,presentation/tables/test_demand_groups.csv,v2/v3,不同需求水平下的两模型 MAE,独立测试，按真实小时租赁量分组,第 10 页；柱高及各组样本数直接读取 CSV。 绘图脚本：presentation/scripts/make_presentation_figures.py
+figures/04_mlp/demand_group_comparison.svg,presentation/tables/test_demand_groups.csv,v2/v3,不同需求水平下的两模型 MAE,独立测试，按真实小时租赁量分组,第 10 页；柱高及各组样本数直接读取 CSV。 绘图脚本：presentation/scripts/make_presentation_figures.py

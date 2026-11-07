@@ -1,15 +1,21 @@
 """Protect time-validation, metric semantics and deployable Pipeline behavior."""
 
+import json
+import sys
+
 import joblib
 import numpy as np
+import pandas as pd
 import pytest
 from sklearn.base import clone
 from sklearn.exceptions import NotFittedError
+from sklearn.pipeline import Pipeline
 
 from bike_sharing.data import FEATURES, TARGET, load_and_split
 from bike_sharing.metrics import regression_metrics
 from bike_sharing.models import MODEL_NAMES, build_model
-from bike_sharing.train import DEFAULT_CONFIG, load_config, run_experiment
+from bike_sharing.paths import PROJECT_ROOT
+from bike_sharing.train import DEFAULT_CONFIG, HOLDOUT_MODELS, load_config, main, run_experiment
 from bike_sharing.validation import make_time_folds
 
 
@@ -72,8 +78,6 @@ def test_experiment_uses_shared_validation_rows_and_refuses_overwrite(tmp_path):
     config["n_splits"] = 2
     output = tmp_path / "run"
     summary = run_experiment(train.iloc[:900], config, ["ridge", "decision_tree"], output)
-    import pandas as pd
-
     predictions = pd.read_csv(output / "validation_predictions.csv")
     ridge = predictions[predictions.model == "ridge"]
     tree = predictions[predictions.model == "decision_tree"]
@@ -86,3 +90,48 @@ def test_experiment_uses_shared_validation_rows_and_refuses_overwrite(tmp_path):
 def test_gradient_boosting_rejects_random_early_stopping():
     with pytest.raises(ValueError, match="early stopping"):
         build_model("gradient_boosting", {"early_stopping": True})
+
+
+def test_holdout_entry_uses_development_only(monkeypatch, tmp_path):
+    dev, held = load_and_split()
+
+    def fake_fit(self, x, y):
+        pd.testing.assert_frame_equal(x, dev[FEATURES])
+        pd.testing.assert_series_equal(y, dev[TARGET])
+        return self
+
+    def fake_predict(self, x):
+        pd.testing.assert_frame_equal(x, held[FEATURES])
+        return np.full(len(x), -0.25)
+
+    monkeypatch.setattr(Pipeline, "fit", fake_fit)
+    monkeypatch.setattr(Pipeline, "predict", fake_predict)
+    monkeypatch.setattr(sys, "argv", ["bike-train", "--holdout", "--output-root", str(tmp_path)])
+    main()
+    (run,) = tmp_path.iterdir()
+    metadata = json.loads((run / "metadata.json").read_text("utf-8"))
+    assert metadata["test_evaluated"] and metadata["models"] == list(HOLDOUT_MODELS)
+    assert (run / "config.toml").read_bytes() == DEFAULT_CONFIG.read_bytes()
+    pred = pd.read_csv(run / "predictions.csv.gz")
+    assert pred.groupby("case").size().to_dict() == dict.fromkeys(HOLDOUT_MODELS, len(held))
+    assert (pred.y_pred == -0.25).all()
+    np.testing.assert_array_equal(pred.residual, pred.y_pred - pred.y_true)
+
+
+def test_holdout_published_predictions_match_test_set_and_metrics():
+    _, held = load_and_split()
+    reports = PROJECT_ROOT / "reports"
+    pred = pd.read_csv(reports / "holdout_predictions.csv.gz", float_precision="round_trip")
+    metrics = pd.read_csv(reports / "holdout_metrics.csv", float_precision="round_trip")
+    assert set(pred.case) == set(metrics.case) == set(HOLDOUT_MODELS)
+    keys = held[["dteday", "hr", "workingday", TARGET]].rename(columns={TARGET: "y_true"})
+    keys = keys.rename_axis("row_id").reset_index()
+    for name, part in pred.groupby("case"):
+        part = part.reset_index(drop=True)
+        part["dteday"] = pd.to_datetime(part.dteday)
+        pd.testing.assert_frame_equal(part[keys.columns], keys)
+        np.testing.assert_array_equal(part.residual, part.y_pred - part.y_true)
+        scores = regression_metrics(keys.y_true, part.y_pred)
+        np.testing.assert_allclose(
+            metrics.set_index("case").loc[name, list(scores)], list(scores.values())
+        )
