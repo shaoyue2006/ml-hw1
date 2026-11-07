@@ -4,7 +4,7 @@
 
 | 旧路径或命令 | 新路径或命令 |
 | --- | --- |
-| `数据集/共享单车/` | `projects/bike-sharing-regression/data/raw/` |
+| `数据集/共享单车/` | `projects/regression-analysis/data/raw/` |
 | `共享单车项目/preprocessing.py` | `src/bike_sharing/data.py` 与 `src/bike_sharing/preprocessing.py` |
 | `共享单车项目/prepare_data.py` | `uv run --locked bike-prepare` |
 | `共享单车项目/extended_analysis.py` | `uv run --locked bike-eda` |
@@ -15,7 +15,7 @@
 | 原生成的 `数据/` | `data/processed/` |
 | 根目录 `requirements.txt` | 项目 `pyproject.toml` 与 `uv.lock` |
 
-表中未写完整的新路径均相对 `projects/bike-sharing-regression/`。命令也在该项目目录内执行，首次运行前执行 `uv sync --locked`。旧脚本路径不保留重复实现或兼容入口，组员应更新自己的命令与导入。
+表中未写完整的新路径均相对 `projects/regression-analysis/`。命令也在该项目目录内执行，首次运行前执行 `uv sync --locked`。旧脚本路径不保留重复实现或兼容入口，组员应更新自己的命令与导入。
 
 原 `from preprocessing import ...` 改为：
 
