@@ -1,6 +1,6 @@
 # 共享单车租赁需求回归
 
-使用 UCI Bike Sharing 的 2011—2012 年小时数据，根据天气与日历特征预测每小时租赁总量 `cnt`。当前版本完成 A 模块的目录迁移与 uv 环境管理，尚未训练 B 的四种模型。
+使用 UCI Bike Sharing 的 2011—2012 年小时数据，根据天气与日历特征预测每小时租赁总量 `cnt`。已实现 Ridge、Poisson、决策树及直方图梯度提升树的基础训练与时间验证，独立测试集留待 B/C 配置冻结后统一评价。
 
 ## 环境与运行
 
@@ -10,6 +10,12 @@
 uv sync --locked
 uv run --locked bike-prepare
 uv run --locked bike-eda
+uv run --locked bike-ridge
+uv run --locked bike-poisson
+uv run --locked bike-decision-tree
+uv run --locked bike-gradient-boosting
+uv run --locked bike-train --model ridge
+uv run --locked bike-train --model all
 uv run --locked pytest
 uv run --locked ruff check .
 uv run --locked ruff format --check .
@@ -31,7 +37,7 @@ docs/              数据运行说明和迁移记录
 tests/             原始文件完整性、时间划分与特征契约检查
 ```
 
-`configs/` 与模型运行子目录在对应功能落地时增加，不预建空模块。`reports/figures/` 保留原有已提交图表，重新运行生成到 `artifacts/eda/`，不会覆盖报告归档。
+基础配置位于 `configs/baseline.toml`；模型运行产物位于 `artifacts/runs/<run_id>/`，默认不提交 Git。`reports/figures/` 保留原有已提交图表，探索脚本重新运行生成到 `artifacts/eda/`，不会覆盖报告归档。
 
 ## 数据与接口
 
@@ -54,6 +60,10 @@ train, test = load_and_split()
 - 训练集内部采用共享的时间验证折，每折单独拟合完整预处理流水线。
 - 基础评价保留原始预测，不取整；负预测单独统计。
 - B、C 配置冻结前，不使用独立测试集评价和调参。
-- 后续分阶段实现 Ridge、其余模型、结果报告与 B→C 交接。
+- 四模型共享整日时间验证折，基础参数固定；C 在相同协议下优化。
 
 详细数据分析见 [A 阶段报告](reports/data_preparation.md)，运行细节见 [数据准备说明](docs/data_preparation.md)。
+
+模型运行见 [训练说明](docs/training.md)，实测结果见 [基础模型报告](reports/baseline_report.md)，优化接口见 [B→C 交接](reports/handoff_to_c.md)。
+
+四种算法分别位于 `src/bike_sharing/models/` 下的独立文件；训练后可用 `bike-compare --inputs <运行目录...>` 单独汇总。代码调用关系和修改位置见 [代码导读](docs/code_walkthrough.md)。

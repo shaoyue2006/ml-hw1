@@ -9,10 +9,12 @@ description = "Reproducible regression experiments on UCI Bike Sharing data"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "joblib>=1.6.0",
     "matplotlib>=3.9,<4",
     "numpy>=2,<3",
     "pandas>=2.2,<3",
     "scikit-learn>=1.5,<2",
+    "threadpoolctl>=3.8.0",
 ]
 
 [dependency-groups]
@@ -21,6 +23,12 @@ dev = ["pytest>=8,<10", "ruff>=0.9,<1"]
 [project.scripts]
 bike-prepare = "bike_sharing.prepare_data:main"
 bike-eda = "bike_sharing.extended_analysis:main"
+bike-train = "bike_sharing.train:main"
+bike-ridge = "bike_sharing.models.ridge:main"
+bike-poisson = "bike_sharing.models.poisson:main"
+bike-decision-tree = "bike_sharing.models.decision_tree:main"
+bike-gradient-boosting = "bike_sharing.models.gradient_boosting:main"
+bike-compare = "bike_sharing.aggregate:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/bike_sharing"]
