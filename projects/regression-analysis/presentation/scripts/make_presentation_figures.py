@@ -1,6 +1,7 @@
-"""Render classroom figures from the fitted MLP and the published test group table."""
+"""Render classroom figures from published results and the fitted MLP."""
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -16,6 +17,66 @@ PRES = Path(__file__).resolve().parents[1]
 DEST = PRES / "figures/04_mlp"
 INK, MUTED = "#152C42", "#465D6B"
 BLUE, TEAL = "#345D88", "#117B72"
+
+
+def model_names():
+    table = pd.read_csv(PRES / "tables/performance_summary.csv")
+    return table.set_index("model_id", verify_integrity=True)["model"]
+
+
+def comparisons():
+    root = PRES.parent
+    sys.path[:0] = [str(root / "v1/src"), str(root / "v2"), str(root / "v3/src")]
+    from analysis import comparison_figure
+    from c_stage import analysis as v2_plots
+
+    names = model_names()
+    folds = pd.read_csv(root / "v1/reports/baseline_fold_metrics.csv")
+    baseline = folds.groupby("model", sort=False)[["mae", "rmse"]].agg(["mean", "std"])
+    ids = baseline.index.map(
+        {
+            "ridge": "ridge_v1",
+            "poisson": "poisson",
+            "decision_tree": "decision_tree",
+            "gradient_boosting": "boosting_v1",
+        }
+    )
+    fig, axes = plt.subplots(1, 2, figsize=(11.8, 4.6), layout="constrained")
+    for ax, metric in zip(axes, ("mae", "rmse"), strict=True):
+        ax.bar(names.loc[ids], baseline[metric]["mean"], yerr=baseline[metric]["std"], capsize=3)
+        ax.set(title=f"五折时间验证 {metric.upper()}（均值 ± 标准差）", ylabel="辆次/小时")
+    fig.savefig(PRES / "figures/02_baselines/v1_four_model_metrics.png", dpi=220)
+    plt.close(fig)
+
+    run = root / "v2/c_stage/runs/pre_1109"
+    out = PRES / "figures/03_optimization"
+    selected = json.loads((run / "freeze/selection.json").read_text(encoding="utf-8"))["selected"]
+    with plt.rc_context():
+        v2_plots.style()
+        plt.rcParams["savefig.dpi"] = 220
+        v2_plots.plot_metrics(
+            pd.read_csv(run / "analysis/model_comparison.csv"),
+            out,
+            filename="v2_model_comparison.png",
+        )
+        v2_plots.plot_week(
+            pd.read_csv(run / "test/predictions.csv.gz"), selected, out, filename="v2_test_week.png"
+        )
+
+    with plt.rc_context(
+        {
+            "font.family": "DejaVu Sans",
+            "axes.spines.top": False,
+            "axes.spines.right": False,
+            "axes.grid": True,
+            "grid.alpha": 0.15,
+            "axes.axisbelow": True,
+        }
+    ):
+        comparison_figure(
+            pd.read_csv(root / "v3/results/analysis/model_comparison.csv"),
+            DEST / "v3_model_comparison.png",
+        )
 
 
 def canvas():
@@ -163,7 +224,7 @@ def demand():
     ax = fig.add_axes([0.115, 0.205, 0.84, 0.53])
     x = np.arange(len(tab))
     for offset, key, name, color in [
-        (-0.18, "tuned_tree_mae", "v2 调参原生类别提升树", BLUE),
+        (-0.18, "tuned_tree_mae", "v2 " + model_names().loc["boosting_tuned"], BLUE),
         (0.18, "mlp_mae", "v3 PyTorch MLP", TEAL),
     ]:
         bars = ax.bar(x + offset, tab[key], 0.33, color=color, label=name, zorder=3)
@@ -191,7 +252,7 @@ def demand():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "figure", choices=["architecture", "demand", "all"], default="all", nargs="?"
+        "figure", choices=["architecture", "demand", "comparisons", "all"], default="all", nargs="?"
     )
     args = parser.parse_args()
     plt.rcParams.update(
@@ -205,3 +266,5 @@ if __name__ == "__main__":
         architecture()
     if args.figure in {"demand", "all"}:
         demand()
+    if args.figure in {"comparisons", "all"}:
+        comparisons()

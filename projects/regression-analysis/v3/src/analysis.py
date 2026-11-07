@@ -16,11 +16,11 @@ from matplotlib import dates as mdates
 
 ARCHIVE = ROOT.parent / "v2/c_stage/runs/pre_1109"
 NAMES = {
-    "ridge_v1": "Ridge",
-    "ridge_hour_workingday": "Ridge + interaction",
-    "boosting_v1": "Boosting (one-hot)",
-    "boosting_native": "Boosting (native)",
-    "boosting_tuned": "Tuned boosting",
+    "ridge_v1": "Ridge (baseline)",
+    "ridge_hour_workingday": "Ridge (combined features)",
+    "boosting_v1": "Gradient boosting (baseline)",
+    "boosting_native": "Gradient boosting\n(native categorical handling)",
+    "boosting_tuned": "Gradient boosting (native categories\n+ optimized hyperparameters)",
     "mlp": "PyTorch MLP",
 }
 BLUE, TEAL, ORANGE = "#355b85", "#087c70", "#b06537"
@@ -95,7 +95,7 @@ def prediction_figures(test, out):
 
 
 def comparison_figure(table, path):
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4.5), layout="constrained")
+    fig, axes = plt.subplots(1, 2, figsize=(12.6, 5.8), layout="constrained")
     ticks = np.arange(len(NAMES))
     for ax, metric in zip(axes, ["rmse", "mae"], strict=True):
         for split, label, color, shift in [
@@ -113,8 +113,10 @@ def comparison_figure(table, path):
         )
         ax.invert_yaxis()
         ax.margins(x=0.14)
-    axes[1].legend(fontsize=8, loc="lower right")
-    fig.savefig(path, dpi=160)
+    fig.legend(
+        *axes[0].get_legend_handles_labels(), loc="outside upper center", ncols=2, frameon=False
+    )
+    fig.savefig(path, dpi=220)
     plt.close(fig)
 
 

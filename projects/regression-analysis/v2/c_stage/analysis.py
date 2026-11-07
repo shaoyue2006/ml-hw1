@@ -10,19 +10,16 @@ from bike_sharing.data import TARGET, load_and_split
 from bike_sharing.metrics import regression_metrics
 from bike_sharing.results import save_csv
 
-import reproduce
-from c_stage.experiment import TUNED, grid_rows, new_stage, read_json
-
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib import font_manager
 
 LABELS = {
-    "ridge_v1": "Ridge 基线",
-    "ridge_hour_workingday": "Ridge 加交互",
-    "boosting_v1": "提升树基线",
-    "boosting_native": "提升树原生类别",
-    TUNED: "提升树原生类别＋调参",
+    "ridge_v1": "Ridge（基线）",
+    "ridge_hour_workingday": "Ridge（组合特征优化）",
+    "boosting_v1": "梯度提升树（基线）",
+    "boosting_native": "梯度提升树（原生类别处理）",
+    "boosting_tuned": "梯度提升树（原生类别 + 超参数优化）",
 }
 BLUE, TEAL, GREY = "#395981", "#09776e", "#607180"
 
@@ -44,6 +41,8 @@ def groups(pred):
 
 
 def legacy_groups():
+    import reproduce
+
     pred = pd.read_csv(reproduce.V2 / "artifacts/validation_predictions.csv.gz")
     train, _ = load_and_split()
     keys = train[["dteday", "hr", "workingday", TARGET]].rename_axis("row_id").reset_index()
@@ -118,8 +117,8 @@ def plot_grid(data, out):
     finish(fig, out / "sensitivity.png")
 
 
-def plot_metrics(comparison, out):
-    fig, axes = plt.subplots(1, 2, figsize=(10.8, 4.1), layout="constrained")
+def plot_metrics(comparison, out, filename="model_comparison.png"):
+    fig, axes = plt.subplots(1, 2, figsize=(12.6, 5.0), layout="constrained")
     positions = np.arange(len(comparison))
     for ax, metric in zip(axes, ["rmse", "mae"], strict=True):
         for offset, key, title, color in [
@@ -134,13 +133,16 @@ def plot_metrics(comparison, out):
             title=metric.upper() + "（越低越好）",
             yticks=positions,
         )
-        ax.set_yticklabels([LABELS[x] for x in comparison.case] if ax is axes[0] else [])
+        labels = [LABELS[x] for x in comparison.case] if ax is axes[0] else []
+        ax.set_yticklabels(labels, fontsize=10)
         ax.invert_yaxis()
-    axes[1].legend(loc="lower right", fontsize=9)
-    finish(fig, out / "model_comparison.png")
+    fig.legend(
+        *axes[0].get_legend_handles_labels(), loc="outside upper center", ncols=2, frameon=False
+    )
+    finish(fig, out / filename)
 
 
-def plot_week(pred, winner, out):
+def plot_week(pred, winner, out, filename="test_week.png"):
     pred = pred.copy()
     pred["time"] = pd.to_datetime(pred.dteday) + pd.to_timedelta(pred.hr, unit="h")
     start = pred.time.min().normalize()
@@ -149,8 +151,8 @@ def plot_week(pred, winner, out):
     fig, ax = plt.subplots(figsize=(10.8, 4.1), layout="constrained")
     for case, key, label, color, line in [
         (winner, "y_true", "真实租赁量", "#28343b", "-"),
-        ("boosting_v1", "y_pred", "提升树基线", "#ae784f", "--"),
-        (winner, "y_pred", "验证选定模型", TEAL, "-"),
+        ("boosting_v1", "y_pred", LABELS["boosting_v1"], "#ae784f", "--"),
+        (winner, "y_pred", LABELS[winner], TEAL, "-"),
     ]:
         values = week[week.case == case].set_index("time")[key].reindex(dates)
         ax.plot(dates, values, label=label, lw=1.7, color=color, ls=line)
@@ -162,11 +164,19 @@ def plot_week(pred, winner, out):
         title="独立测试期的前七个自然日",
     )
     ax.grid(axis="y", alpha=0.2)
-    ax.legend(ncol=3, fontsize=9)
-    finish(fig, out / "test_week.png")
+    fig.legend(
+        *ax.get_legend_handles_labels(),
+        loc="outside upper center",
+        ncols=3,
+        fontsize=9,
+        frameon=False,
+    )
+    finish(fig, out / filename)
 
 
 def analyze(run, reference):
+    from c_stage.experiment import TUNED, grid_rows, new_stage, read_json
+
     test = pd.read_csv(run / "test/predictions.csv.gz")
     selected = read_json(run / "freeze/selection.json")
     grid = pd.read_csv(run / "search/validation_predictions.csv.gz")
