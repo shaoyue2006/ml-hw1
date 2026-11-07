@@ -8,4 +8,4 @@ projects/**/*.md text eol=lf
 .python-version text eol=lf
 *.png binary
 # Preserve the source files byte-for-byte, including their original line endings.
-projects/*/data/raw/* -text
+projects/**/data/raw/* -text

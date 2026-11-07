@@ -1,6 +1,6 @@
 # 基础回归模型训练
 
-所有命令在 `projects/regression-analysis/` 执行。
+所有命令在 `projects/regression-analysis/v1/` 执行。
 
 ```powershell
 uv sync --locked

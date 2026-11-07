@@ -21,24 +21,27 @@
 ├── .gitattributes
 └── projects/
     └── regression-analysis/
-        ├── README.md
-        ├── pyproject.toml
-        ├── uv.lock
-        ├── .python-version
-        ├── configs/           # 实验配置
-        ├── src/               # 数据处理、模型与训练代码
-        ├── data/              # 原始数据及派生数据
-        ├── artifacts/         # 本地实验产物
-        ├── docs/              # 使用说明与代码导读
-        ├── reports/           # 实验报告与交接说明
-        └── tests/             # 自动化检查
+        ├── README.md           # 版本导航
+        ├── v1/                 # 第一轮完整项目
+        │   ├── README.md
+        │   ├── pyproject.toml
+        │   ├── uv.lock
+        │   ├── .python-version
+        │   ├── configs/
+        │   ├── src/
+        │   ├── data/
+        │   ├── artifacts/
+        │   ├── docs/
+        │   ├── reports/
+        │   └── tests/
+        └── v2/                 # 改进指导与诊断结论
 ```
 
 后续项目在 `projects/` 下建立独立目录。项目名称优先描述研究任务。
 
 ## 环境管理
 
-各项目使用 uv 独立管理 Python 环境：
+各项目的可运行版本使用 uv 独立管理 Python 环境：
 
 - `pyproject.toml` 声明项目依赖、运行入口及开发工具配置。
 - `uv.lock` 锁定依赖版本，便于复现实验环境。
@@ -48,7 +51,7 @@
 安装 uv 后，进入具体项目目录同步环境：
 
 ```shell
-cd projects/regression-analysis
+cd projects/regression-analysis/v1
 uv sync --locked
 ```
 
