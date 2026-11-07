@@ -1,4 +1,11 @@
 __pycache__/
 *.py[cod]
 .venv/
-共享单车项目/数据/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+**/dist/
+**/build/
+**/data/processed/
+**/artifacts/
+.ipynb_checkpoints/

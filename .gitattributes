@@ -1,0 +1,11 @@
+# Keep code and documentation consistent across Windows and Unix.
+*.py text eol=lf
+projects/**/*.md text eol=lf
+*.toml text eol=lf
+*.lock text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.python-version text eol=lf
+*.png binary
+# Preserve the source files byte-for-byte, including their original line endings.
+projects/*/data/raw/* -text
